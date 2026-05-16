@@ -1,0 +1,624 @@
+#+title: Dpp Practicals
+
+* Practical 1 - Socket Programming
+** TCP
+*** Client
+#+begin_src python :tangle skt_tcp_c.py
+import socket
+
+# Create TCP socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+host = '127.0.0.1'
+port = 5000
+
+client_socket.connect((host, port))
+print("Connected to TCP Server")
+
+while True:
+    message = input("Client: ")
+    client_socket.send(message.encode())
+
+    response = client_socket.recv(1024).decode()
+    print("Server:", response)
+
+client_socket.close()
+#+end_src
+
+*** Server
+#+begin_src python :tangle skt_tcp_s.py
+import socket
+
+# Create TCP socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+host = '127.0.0.1'
+port = 5000
+
+server_socket.bind((host, port))
+server_socket.listen(5)
+
+print("TCP Server waiting for connection...")
+
+conn, addr = server_socket.accept()
+print("Connected to:", addr)
+
+while True:
+    data = conn.recv(1024).decode()
+    if not data:
+
+        break
+    print("Client:", data)
+
+    response = input("Server: ")
+    conn.send(response.encode())
+
+conn.close()
+server_socket.close()
+#+end_src
+** UDP
+*** Client
+#+begin_src python :tangle skt_udp_c.py
+import socket
+
+# Create UDP socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+host = '127.0.0.1'
+port = 6000
+
+while True:
+    message = input("Client: ")
+    client_socket.sendto(message.encode(), (host, port))
+
+    data, addr = client_socket.recvfrom(1024)
+    print("Server:", data.decode())
+#+end_src
+
+*** Server
+#+begin_src python :tangle skt_udp_s.py
+import socket
+
+# Create UDP socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+host = '127.0.0.1'
+port = 6000
+
+server_socket.bind((host, port))
+print("UDP Server ready...")
+
+while True:
+    data, addr = server_socket.recvfrom(1024)
+    print("Client:", data.decode())
+
+    response = input("Server: ")
+    server_socket.sendto(response.encode(), addr)
+#+end_src
+
+* Practical 2 - RPC Implementation
+** Client
+#+begin_src python :tangle rpc_c.py
+import xmlrpc.client
+
+# Connect to RPC server
+proxy = xmlrpc.client.ServerProxy("http://localhost:8000/")
+
+# Call remote methods
+print("Addition:", proxy.add(10, 5))
+print("Subtraction:", proxy.subtract(10, 5))
+print("Multiplication:", proxy.multiply(10, 5))
+print("Division:", proxy.divide(10, 5))
+#+end_src
+
+** Server
+#+begin_src python :tangle rpc_s.py
+from xmlrpc.server import SimpleXMLRPCServer
+
+# Create RPC server
+server = SimpleXMLRPCServer(("localhost", 8000))
+print("RPC Server is running on port 8000...")
+
+# Define remote functions
+def add(a, b):
+    return a + b
+
+def subtract(a, b):
+    return a - b
+
+def multiply(a, b):
+    return a * b
+
+def divide(a, b):
+    if b == 0:
+        return "Error: Division by zero"
+    return a / b
+
+# Register functions
+server.register_function(add, "add")
+server.register_function(subtract, "subtract")
+server.register_function(multiply, "multiply")
+server.register_function(divide, "divide")
+
+# Run server
+server.serve_forever()
+#+end_src
+
+* Practical 3 - Clock Synchronization
+#+begin_src python :tangle clksy.py
+import time
+import random
+
+# -------------------------
+# Time Server
+# -------------------------
+class TimeServer:
+    def get_time(self):
+        # Returns current server time
+        return time.time()
+
+# -------------------------
+# Client Node
+# -------------------------
+class Client:
+    def __init__(self, clock_offset):
+        # Client clock is ahead/behind by offset seconds
+        self.clock_offset = clock_offset
+
+    def get_local_time(self):
+        return time.time() + self.clock_offset
+
+    def synchronize_clock(self, server):
+        print("\n--- Cristian’s Algorithm ---")
+
+        # Client sends request at time T1
+        T1 = self.get_local_time()
+        print("Client sends request at:", T1)
+
+        # Simulated network delay
+        delay = random.uniform(0.1, 0.5)
+        time.sleep(delay)
+
+        # Server sends its time
+        server_time = server.get_time()
+
+        # Simulated return delay
+        time.sleep(delay)
+
+        # Client receives response at time T2
+        T2 = self.get_local_time()
+        print("Client receives response at:", T2)
+
+        # RTT calculation
+        RTT = T2 - T1
+        print("Estimated RTT:", RTT)
+
+        # Cristian's time calculation
+        adjusted_time = server_time + (RTT / 2)
+
+        # Adjust client clock
+        self.clock_offset = adjusted_time - time.time()
+
+        print("Client clock synchronized!")
+        print("New Client Time:", self.get_local_time())
+
+# -------------------------
+# Main Simulation
+# -------------------------
+if __name__ == "__main__":
+    server = TimeServer()
+
+    # Client clock is 5 seconds slow
+    client = Client(clock_offset=-5)
+
+    print("Initial Client Time:", client.get_local_time())
+    print("Server Time:", server.get_time())
+
+    client.synchronize_clock(server)
+#+end_src
+
+#+RESULTS:
+: Initial Client Time: 1778922172.6111681
+: Server Time: 1778922177.6111875
+:
+: --- Cristian’s Algorithm ---
+: Client sends request at: 1778922172.6111968
+: Client receives response at: 1778922173.3584142
+: Estimated RTT: 0.7472174167633057
+: Client clock synchronized!
+: New Client Time: 1778922178.3584182
+
+* Practical 4 - Leader Election Algorithm
+#+begin_src python :tangle leader.py
+class BullyElection:
+    def __init__(self, processes):
+        self.processes = processes
+        self.coordinator = None
+
+    def start_election(self, initiator):
+        print(f"\nProcess {initiator} starts Bully Election")
+        active_higher = False
+
+        for pid in self.processes:
+            if pid > initiator and self.processes[pid]:
+                print(f"Process {initiator} sends ELECTION to {pid}")
+                active_higher = True
+
+        if not active_higher:
+            self.coordinator = initiator
+        else:
+            self.coordinator = max(pid for pid in self.processes if self.processes[pid])
+
+        print(f"Process {self.coordinator} becomes the COORDINATOR")
+
+    def display(self):
+        print("\nProcess Status:")
+        for pid, status in self.processes.items():
+            print(f"Process {pid}: {'Active' if status else 'Down'}")
+        print(f"Coordinator: {self.coordinator}")
+
+
+class RingElection:
+    def __init__(self, processes):
+        self.processes = processes
+        self.coordinator = None
+
+    def start_election(self, initiator):
+        print(f"\nProcess {initiator} starts Ring Election")
+        message = []
+        pids = list(self.processes.keys())
+        n = len(pids)
+        index = pids.index(initiator)
+
+        current = index
+        while True:
+            pid = pids[current]
+            if self.processes[pid]:
+                print(f"Process {pid} passes message")
+                message.append(pid)
+
+            current = (current + 1) % n
+            if pids[current] == initiator:
+                break
+
+        self.coordinator = max(message)
+        print(f"Process {self.coordinator} becomes the COORDINATOR")
+
+    def display(self):
+        print("\nProcess Status:")
+        for pid, status in self.processes.items():
+            print(f"Process {pid}: {'Active' if status else 'Down'}")
+        print(f"Coordinator: {self.coordinator}")
+
+
+def main():
+    processes = {
+        1: True,
+        2: True,
+        3: False,
+        4: True,
+        5: True
+    }
+
+    bully = BullyElection(processes)
+    ring = RingElection(processes)
+
+    while True:
+        print("\nLEADER ELECTION MENU")
+        print("1. Bully Election Algorithm")
+        print("2. Ring Election Algorithm")
+        print("3. Exit")
+
+        choice = int(input("Enter your choice: "))
+
+        if choice == 1:
+            bully.display()
+            initiator = int(input("Enter initiator process ID: "))
+            bully.start_election(initiator)
+
+        elif choice == 2:
+            ring.display()
+            initiator = int(input("Enter initiator process ID: "))
+            ring.start_election(initiator)
+
+        elif choice == 3:
+            print("Exiting Program...")
+            break
+
+        else:
+            print("Invalid choice!")
+
+
+if __name__ == "__main__":
+    main()
+#+end_src
+
+#+RESULTS:
+:
+: LEADER ELECTION MENU
+: 1. Bully Election Algorithm
+: 2. Ring Election Algorithm
+: 3. Exit
+: Enter your choice:
+
+* Practical 5 - Distributed Mutual Exclusion
+#+begin_src python :tangle mutial.py
+# Lamport's Mutual Exclusion Algorithm (Simulation)
+
+import heapq
+
+class Process:
+    def __init__(self, pid):
+        self.pid = pid
+        self.clock = 0
+        self.queue = []
+
+    def request_cs(self):
+        self.clock += 1
+        timestamp = self.clock
+        heapq.heappush(self.queue, (timestamp, self.pid))
+        print(f"Process {self.pid} requests CS at time {timestamp}")
+        return (timestamp, self.pid)
+
+    def receive_request(self, request):
+        heapq.heappush(self.queue, request)
+        self.clock = max(self.clock, request[0]) + 1
+
+    def release_cs(self):
+        heapq.heappop(self.queue)
+        print(f"Process {self.pid} releases CS")
+
+    def can_enter_cs(self):
+        return self.queue[0][1] == self.pid
+
+
+# Create processes
+p1 = Process(1)
+p2 = Process(2)
+p3 = Process(3)
+
+# Simulate requests
+req1 = p1.request_cs()
+p2.receive_request(req1)
+p3.receive_request(req1)
+
+req2 = p2.request_cs()
+p1.receive_request(req2)
+p3.receive_request(req2)
+
+# Check who enters CS
+if p1.can_enter_cs():
+    print("Process 1 enters Critical Section")
+    p1.release_cs()
+
+if p2.can_enter_cs():
+    print("Process 2 enters Critical Section")
+    p2.release_cs()
+#+end_src
+
+#+RESULTS:
+: Process 1 requests CS at time 1
+: Process 2 requests CS at time 3
+: Process 1 enters Critical Section
+: Process 1 releases CS
+
+* Practical 6 - Parallel Matrix Multplication
+#+begin_src python :tangle matrix.py
+import multiprocessing
+import time
+
+# Matrix size
+SIZE = 3
+
+# Initialize matrices
+A = [[i + j for j in range(SIZE)] for i in range(SIZE)]
+B = [[i * j for j in range(SIZE)] for i in range(SIZE)]
+
+
+# Function to compute one row of result
+def multiply_row(i):
+    row = []
+    for j in range(SIZE):
+        sum_val = 0
+        for k in range(SIZE):
+            sum_val += A[i][k] * B[k][j]
+        row.append(sum_val)
+    return row
+
+
+if __name__ == "__main__":
+
+    # Sequential multiplication
+    start_seq = time.time()
+
+    seq_result = []
+    for i in range(SIZE):
+        seq_result.append(multiply_row(i))
+
+    end_seq = time.time()
+
+    print("\nSequential Time:", end_seq - start_seq)
+
+    print("Matrix A:")
+    for row in A:
+        print(row)
+
+    print("\nMatrix B:")
+    for row in B:
+        print(row)
+
+    start = time.time()
+
+    # Create process pool
+    with multiprocessing.Pool() as pool:
+        result = pool.map(multiply_row, range(SIZE))
+
+    end = time.time()
+
+    # FIXED: These lines are now indented correctly
+    print("\nResult Matrix C:")
+    for row in result:
+        print(row)
+    print("\nParallel Time Taken:", end - start, "seconds")
+#+end_src
+
+* Practical 7 - Parallel Merge Sort
+#+begin_src python :tangle merge.py
+from multiprocessing import Process, Queue
+
+def merge(left, right):
+    result = []
+    i = j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] < right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+
+
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+
+    return merge(left, right)
+
+
+def parallel_sort(arr, q):
+    q.put(merge_sort(arr))
+
+
+if __name__ == "__main__":
+    arr = [8, 3, 7, 4, 9, 2, 6, 5]
+    mid = len(arr) // 2
+
+    q1 = Queue()
+    q2 = Queue()
+
+    p1 = Process(target=parallel_sort, args=(arr[:mid], q1))
+    p2 = Process(target=parallel_sort, args=(arr[mid:], q2))
+
+    p1.start()
+    p2.start()
+
+    left = q1.get()
+    right = q2.get()
+
+    p1.join()
+    p2.join()
+
+    sorted_arr = merge(left, right)
+
+    print("Original Array:", arr)
+    print("Sorted Array:", sorted_arr)
+#+end_src
+
+* Practical 8 - Load Balancing Simulation
+#+begin_src python :tangle load.py
+import random
+
+tasks = [random.randint(1, 10) for _ in range(10)]
+nodes = [0, 0, 0]
+
+# 🔹 Static Load Balancing (Round Robin)
+for i, t in enumerate(tasks):
+    nodes[i % len(nodes)] += t
+
+print("Static Load:", nodes)
+
+# 🔹 Dynamic Load Balancing (Assign to least loaded node)
+nodes = [0, 0, 0]
+
+for t in tasks:
+    idx = nodes.index(min(nodes))
+    nodes[idx] += t
+
+print("Dynamic Load:", nodes)
+#+end_src
+
+#+RESULTS:
+: Static Load: [21, 19, 9]
+: Dynamic Load: [17, 16, 16]
+
+* Practical 9 - Fault Tolerance Mechanism
+#+begin_src python :tangle fault.py
+import random
+
+file = "log.txt"
+
+# Read last checkpoint
+try:
+    f = open(file, "r")
+    last = int(f.read())
+    f.close()
+except:
+    last = 0
+
+print("Starting from step:", last)
+
+try:
+    for i in range(last + 1, 11):
+        print("Step:", i)
+
+        # Save checkpoint
+        f = open(file, "w")
+        f.write(str(i))
+        f.close()
+
+        # Simulate failure
+        if random.random() < 0.3:
+            raise Exception("Crash")
+
+except:
+    print("Failure! Restart program to recover.")
+#+end_src
+
+#+RESULTS:
+: Starting from step: 10
+
+* Practical 10 - MapReduce Word Count
+#+begin_src python :tangle mapreduce.py
+def local_wc():
+    try:
+        text = open("input.txt").read().lower().split()
+        print("\nLocal Result:")
+        for w in set(text):
+            print(w, ":", text.count(w))
+    except:
+        print("input.txt not found!")
+
+
+def spark_wc():
+    try:
+        from pyspark import SparkContext
+        sc = SparkContext("local[*]", "WC")
+
+        r = (sc.textFile("input.txt")
+             .flatMap(lambda x: x.split())
+             .map(lambda x: (x.lower(), 1))
+             .reduceByKey(lambda a, b: a + b)
+             .collect())
+
+        print("\nPySpark Result:")
+        for w, c in r:
+            print(w, ":", c)
+
+        sc.stop()
+
+    except Exception as e:
+        print("PySpark Error:", e)
+
+
+ch = input("1.Local  2.PySpark : ")
+local_wc() if ch == "1" else spark_wc()
+#+end_src

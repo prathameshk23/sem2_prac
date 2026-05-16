@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2026-05-16 Sat 14:25 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dpp Practicals</title>
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://gongzhitaao.org/orgcss/org.css"/>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Dpp Practicals</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org3b46414">1. Practical 1 - Socket Programming</a>
+<ul>
+<li><a href="#org4201200">1.1. TCP</a>
+<ul>
+<li><a href="#org9716d7f">1.1.1. Client</a></li>
+<li><a href="#orgb1a0531">1.1.2. Server</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3b46414" class="outline-2">
+<h2 id="org3b46414"><span class="section-number-2">1.</span> Practical 1 - Socket Programming</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org4201200" class="outline-3">
+<h3 id="org4201200"><span class="section-number-3">1.1.</span> TCP</h3>
+<div class="outline-text-3" id="text-1-1">
+</div>
+<div id="outline-container-org9716d7f" class="outline-4">
+<h4 id="org9716d7f"><span class="section-number-4">1.1.1.</span> Client</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> socket
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Create TCP socket
+</span><span class="org-variable-name">client_socket</span> <span class="org-operator">=</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+<span class="org-variable-name">host</span> <span class="org-operator">=</span> <span class="org-string">'127.0.0.1'</span>
+<span class="org-variable-name">port</span> <span class="org-operator">=</span> 5000
+
+client_socket.connect((host, port))
+<span class="org-builtin">print</span>(<span class="org-string">"Connected to TCP Server"</span>)
+
+<span class="org-keyword">while</span> <span class="org-constant">True</span>:
+    <span class="org-variable-name">message</span> <span class="org-operator">=</span> <span class="org-builtin">input</span>(<span class="org-string">"Client: "</span>)
+    client_socket.send(message.encode())
+
+    <span class="org-variable-name">response</span> <span class="org-operator">=</span> client_socket.recv(1024).decode()
+    <span class="org-builtin">print</span>(<span class="org-string">"Server:"</span>, response)
+
+client_socket.close()
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb1a0531" class="outline-4">
+<h4 id="orgb1a0531"><span class="section-number-4">1.1.2.</span> Server</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> socket
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Create TCP socket
+</span><span class="org-variable-name">server_socket</span> <span class="org-operator">=</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+<span class="org-variable-name">host</span> <span class="org-operator">=</span> <span class="org-string">'127.0.0.1'</span>
+<span class="org-variable-name">port</span> <span class="org-operator">=</span> 5000
+
+server_socket.bind((host, port))
+server_socket.listen(5)
+
+<span class="org-builtin">print</span>(<span class="org-string">"TCP Server waiting for connection..."</span>)
+
+<span class="org-variable-name">conn</span>, <span class="org-variable-name">addr</span> <span class="org-operator">=</span> server_socket.accept()
+<span class="org-builtin">print</span>(<span class="org-string">"Connected to:"</span>, addr)
+
+<span class="org-keyword">while</span> <span class="org-constant">True</span>:
+    <span class="org-variable-name">data</span> <span class="org-operator">=</span> conn.recv(1024).decode()
+    <span class="org-keyword">if</span> <span class="org-keyword">not</span> data:
+
+        <span class="org-keyword">break</span>
+    <span class="org-builtin">print</span>(<span class="org-string">"Client:"</span>, data)
+
+    <span class="org-variable-name">response</span> <span class="org-operator">=</span> <span class="org-builtin">input</span>(<span class="org-string">"Server: "</span>)
+    conn.send(response.encode())
+
+conn.close()
+server_socket.close()
+</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Created: 2026-05-16 Sat 14:25</p>
+</div>
+</body>
+</html>
