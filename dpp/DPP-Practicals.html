@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-05-16 Sat 14:25 -->
+<!-- 2026-05-16 Sat 15:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dpp Practicals</title>
@@ -17,29 +17,49 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org3b46414">1. Practical 1 - Socket Programming</a>
+<li><a href="#org0cd1652">1. Practical 1 - Socket Programming</a>
 <ul>
-<li><a href="#org4201200">1.1. TCP</a>
+<li><a href="#org9cdd05b">1.1. TCP</a>
 <ul>
-<li><a href="#org9716d7f">1.1.1. Client</a></li>
-<li><a href="#orgb1a0531">1.1.2. Server</a></li>
+<li><a href="#org2ce1e67">1.1.1. Client</a></li>
+<li><a href="#org0894723">1.1.2. Server</a></li>
+</ul>
+</li>
+<li><a href="#org375d20b">1.2. UDP</a>
+<ul>
+<li><a href="#orgeca6058">1.2.1. Client</a></li>
+<li><a href="#orgbf2c855">1.2.2. Server</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li><a href="#org654c451">2. Practical 2 - RPC Implementation</a>
+<ul>
+<li><a href="#org16e53bf">2.1. Client</a></li>
+<li><a href="#org08e615a">2.2. Server</a></li>
+</ul>
+</li>
+<li><a href="#org9651c9c">3. Practical 3 - Clock Synchronization</a></li>
+<li><a href="#org295f9f7">4. Practical 4 - Leader Election Algorithm</a></li>
+<li><a href="#orgb5cd66a">5. Practical 5 - Distributed Mutual Exclusion</a></li>
+<li><a href="#org72b9f34">6. Practical 6 - Parallel Matrix Multplication</a></li>
+<li><a href="#orgc7bc998">7. Practical 7 - Parallel Merge Sort</a></li>
+<li><a href="#org3bf8f0d">8. Practical 8 - Load Balancing Simulation</a></li>
+<li><a href="#org1487e1b">9. Practical 9 - Fault Tolerance Mechanism</a></li>
+<li><a href="#org3042f83">10. Practical 10 - MapReduce Word Count</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3b46414" class="outline-2">
-<h2 id="org3b46414"><span class="section-number-2">1.</span> Practical 1 - Socket Programming</h2>
+<div id="outline-container-org0cd1652" class="outline-2">
+<h2 id="org0cd1652"><span class="section-number-2">1.</span> Practical 1 - Socket Programming</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org4201200" class="outline-3">
-<h3 id="org4201200"><span class="section-number-3">1.1.</span> TCP</h3>
+<div id="outline-container-org9cdd05b" class="outline-3">
+<h3 id="org9cdd05b"><span class="section-number-3">1.1.</span> TCP</h3>
 <div class="outline-text-3" id="text-1-1">
 </div>
-<div id="outline-container-org9716d7f" class="outline-4">
-<h4 id="org9716d7f"><span class="section-number-4">1.1.1.</span> Client</h4>
+<div id="outline-container-org2ce1e67" class="outline-4">
+<h4 id="org2ce1e67"><span class="section-number-4">1.1.1.</span> Client</h4>
 <div class="outline-text-4" id="text-1-1-1">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> socket
@@ -65,8 +85,8 @@ client_socket.close()
 </div>
 </div>
 </div>
-<div id="outline-container-orgb1a0531" class="outline-4">
-<h4 id="orgb1a0531"><span class="section-number-4">1.1.2.</span> Server</h4>
+<div id="outline-container-org0894723" class="outline-4">
+<h4 id="org0894723"><span class="section-number-4">1.1.2.</span> Server</h4>
 <div class="outline-text-4" id="text-1-1-2">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> socket
@@ -102,10 +122,638 @@ server_socket.close()
 </div>
 </div>
 </div>
+<div id="outline-container-org375d20b" class="outline-3">
+<h3 id="org375d20b"><span class="section-number-3">1.2.</span> UDP</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<div id="outline-container-orgeca6058" class="outline-4">
+<h4 id="orgeca6058"><span class="section-number-4">1.2.1.</span> Client</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> socket
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Create UDP socket
+</span><span class="org-variable-name">client_socket</span> <span class="org-operator">=</span> socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+<span class="org-variable-name">host</span> <span class="org-operator">=</span> <span class="org-string">'127.0.0.1'</span>
+<span class="org-variable-name">port</span> <span class="org-operator">=</span> 6000
+
+<span class="org-keyword">while</span> <span class="org-constant">True</span>:
+    <span class="org-variable-name">message</span> <span class="org-operator">=</span> <span class="org-builtin">input</span>(<span class="org-string">"Client: "</span>)
+    client_socket.sendto(message.encode(), (host, port))
+
+    <span class="org-variable-name">data</span>, <span class="org-variable-name">addr</span> <span class="org-operator">=</span> client_socket.recvfrom(1024)
+    <span class="org-builtin">print</span>(<span class="org-string">"Server:"</span>, data.decode())
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgbf2c855" class="outline-4">
+<h4 id="orgbf2c855"><span class="section-number-4">1.2.2.</span> Server</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> socket
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Create UDP socket
+</span><span class="org-variable-name">server_socket</span> <span class="org-operator">=</span> socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+<span class="org-variable-name">host</span> <span class="org-operator">=</span> <span class="org-string">'127.0.0.1'</span>
+<span class="org-variable-name">port</span> <span class="org-operator">=</span> 6000
+
+server_socket.bind((host, port))
+<span class="org-builtin">print</span>(<span class="org-string">"UDP Server ready..."</span>)
+
+<span class="org-keyword">while</span> <span class="org-constant">True</span>:
+    <span class="org-variable-name">data</span>, <span class="org-variable-name">addr</span> <span class="org-operator">=</span> server_socket.recvfrom(1024)
+    <span class="org-builtin">print</span>(<span class="org-string">"Client:"</span>, data.decode())
+
+    <span class="org-variable-name">response</span> <span class="org-operator">=</span> <span class="org-builtin">input</span>(<span class="org-string">"Server: "</span>)
+    server_socket.sendto(response.encode(), addr)
+</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org654c451" class="outline-2">
+<h2 id="org654c451"><span class="section-number-2">2.</span> Practical 2 - RPC Implementation</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org16e53bf" class="outline-3">
+<h3 id="org16e53bf"><span class="section-number-3">2.1.</span> Client</h3>
+<div class="outline-text-3" id="text-2-1">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> xmlrpc.client
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Connect to RPC server
+</span><span class="org-variable-name">proxy</span> <span class="org-operator">=</span> xmlrpc.client.ServerProxy(<span class="org-string">"http://localhost:8000/"</span>)
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Call remote methods
+</span><span class="org-builtin">print</span>(<span class="org-string">"Addition:"</span>, proxy.add(10, 5))
+<span class="org-builtin">print</span>(<span class="org-string">"Subtraction:"</span>, proxy.subtract(10, 5))
+<span class="org-builtin">print</span>(<span class="org-string">"Multiplication:"</span>, proxy.multiply(10, 5))
+<span class="org-builtin">print</span>(<span class="org-string">"Division:"</span>, proxy.divide(10, 5))
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org08e615a" class="outline-3">
+<h3 id="org08e615a"><span class="section-number-3">2.2.</span> Server</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">from</span> xmlrpc.server <span class="org-keyword">import</span> SimpleXMLRPCServer
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Create RPC server
+</span><span class="org-variable-name">server</span> <span class="org-operator">=</span> SimpleXMLRPCServer((<span class="org-string">"localhost"</span>, 8000))
+<span class="org-builtin">print</span>(<span class="org-string">"RPC Server is running on port 8000..."</span>)
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Define remote functions
+</span><span class="org-keyword">def</span> <span class="org-function-name">add</span>(a, b):
+    <span class="org-keyword">return</span> a <span class="org-operator">+</span> b
+
+<span class="org-keyword">def</span> <span class="org-function-name">subtract</span>(a, b):
+    <span class="org-keyword">return</span> a <span class="org-operator">-</span> b
+
+<span class="org-keyword">def</span> <span class="org-function-name">multiply</span>(a, b):
+    <span class="org-keyword">return</span> a <span class="org-operator">*</span> b
+
+<span class="org-keyword">def</span> <span class="org-function-name">divide</span>(a, b):
+    <span class="org-keyword">if</span> b <span class="org-operator">==</span> 0:
+        <span class="org-keyword">return</span> <span class="org-string">"Error: Division by zero"</span>
+    <span class="org-keyword">return</span> a <span class="org-operator">/</span> b
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Register functions
+</span>server.register_function(add, <span class="org-string">"add"</span>)
+server.register_function(subtract, <span class="org-string">"subtract"</span>)
+server.register_function(multiply, <span class="org-string">"multiply"</span>)
+server.register_function(divide, <span class="org-string">"divide"</span>)
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Run server
+</span>server.serve_forever()
+</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org9651c9c" class="outline-2">
+<h2 id="org9651c9c"><span class="section-number-2">3.</span> Practical 3 - Clock Synchronization</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> time
+<span class="org-keyword">import</span> random
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">-------------------------
+</span><span class="org-comment-delimiter"># </span><span class="org-comment">Time Server
+</span><span class="org-comment-delimiter"># </span><span class="org-comment">-------------------------
+</span><span class="org-keyword">class</span> <span class="org-type">TimeServer</span>:
+    <span class="org-keyword">def</span> <span class="org-function-name">get_time</span>(<span class="org-keyword">self</span>):
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Returns current server time
+</span>        <span class="org-keyword">return</span> time.time()
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">-------------------------
+</span><span class="org-comment-delimiter"># </span><span class="org-comment">Client Node
+</span><span class="org-comment-delimiter"># </span><span class="org-comment">-------------------------
+</span><span class="org-keyword">class</span> <span class="org-type">Client</span>:
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>, clock_offset):
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Client clock is ahead/behind by offset seconds
+</span>        <span class="org-keyword">self</span>.<span class="org-variable-name">clock_offset</span> <span class="org-operator">=</span> clock_offset
+
+    <span class="org-keyword">def</span> <span class="org-function-name">get_local_time</span>(<span class="org-keyword">self</span>):
+        <span class="org-keyword">return</span> time.time() <span class="org-operator">+</span> <span class="org-keyword">self</span>.clock_offset
+
+    <span class="org-keyword">def</span> <span class="org-function-name">synchronize_clock</span>(<span class="org-keyword">self</span>, server):
+        <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">--- Cristian&#8217;s Algorithm ---"</span>)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Client sends request at time T1
+</span>        <span class="org-variable-name">T1</span> <span class="org-operator">=</span> <span class="org-keyword">self</span>.get_local_time()
+        <span class="org-builtin">print</span>(<span class="org-string">"Client sends request at:"</span>, T1)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Simulated network delay
+</span>        <span class="org-variable-name">delay</span> <span class="org-operator">=</span> random.uniform(0.1, 0.5)
+        time.sleep(delay)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Server sends its time
+</span>        <span class="org-variable-name">server_time</span> <span class="org-operator">=</span> server.get_time()
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Simulated return delay
+</span>        time.sleep(delay)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Client receives response at time T2
+</span>        <span class="org-variable-name">T2</span> <span class="org-operator">=</span> <span class="org-keyword">self</span>.get_local_time()
+        <span class="org-builtin">print</span>(<span class="org-string">"Client receives response at:"</span>, T2)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">RTT calculation
+</span>        <span class="org-variable-name">RTT</span> <span class="org-operator">=</span> T2 <span class="org-operator">-</span> T1
+        <span class="org-builtin">print</span>(<span class="org-string">"Estimated RTT:"</span>, RTT)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Cristian's time calculation
+</span>        <span class="org-variable-name">adjusted_time</span> <span class="org-operator">=</span> server_time <span class="org-operator">+</span> (RTT <span class="org-operator">/</span> 2)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Adjust client clock
+</span>        <span class="org-keyword">self</span>.<span class="org-variable-name">clock_offset</span> <span class="org-operator">=</span> adjusted_time <span class="org-operator">-</span> time.time()
+
+        <span class="org-builtin">print</span>(<span class="org-string">"Client clock synchronized!"</span>)
+        <span class="org-builtin">print</span>(<span class="org-string">"New Client Time:"</span>, <span class="org-keyword">self</span>.get_local_time())
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">-------------------------
+</span><span class="org-comment-delimiter"># </span><span class="org-comment">Main Simulation
+</span><span class="org-comment-delimiter"># </span><span class="org-comment">-------------------------
+</span><span class="org-keyword">if</span> <span class="org-builtin">__name__</span> <span class="org-operator">==</span> <span class="org-string">"__main__"</span>:
+    <span class="org-variable-name">server</span> <span class="org-operator">=</span> TimeServer()
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">Client clock is 5 seconds slow
+</span>    <span class="org-variable-name">client</span> <span class="org-operator">=</span> Client(clock_offset<span class="org-operator">=-</span>5)
+
+    <span class="org-builtin">print</span>(<span class="org-string">"Initial Client Time:"</span>, client.get_local_time())
+    <span class="org-builtin">print</span>(<span class="org-string">"Server Time:"</span>, server.get_time())
+
+    client.synchronize_clock(server)
+</code></pre>
+</div>
+
+<pre class="example">
+Initial Client Time: 1778922172.6111681
+Server Time: 1778922177.6111875
+
+--- Cristian’s Algorithm ---
+Client sends request at: 1778922172.6111968
+Client receives response at: 1778922173.3584142
+Estimated RTT: 0.7472174167633057
+Client clock synchronized!
+New Client Time: 1778922178.3584182
+</pre>
+</div>
+</div>
+<div id="outline-container-org295f9f7" class="outline-2">
+<h2 id="org295f9f7"><span class="section-number-2">4.</span> Practical 4 - Leader Election Algorithm</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">class</span> <span class="org-type">BullyElection</span>:
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>, processes):
+        <span class="org-keyword">self</span>.<span class="org-variable-name">processes</span> <span class="org-operator">=</span> processes
+        <span class="org-keyword">self</span>.<span class="org-variable-name">coordinator</span> <span class="org-operator">=</span> <span class="org-constant">None</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">start_election</span>(<span class="org-keyword">self</span>, initiator):
+        <span class="org-builtin">print</span>(f<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Process </span>{initiator}<span class="org-string"> starts Bully Election"</span>)
+        <span class="org-variable-name">active_higher</span> <span class="org-operator">=</span> <span class="org-constant">False</span>
+
+        <span class="org-keyword">for</span> pid <span class="org-keyword">in</span> <span class="org-keyword">self</span>.processes:
+            <span class="org-keyword">if</span> pid <span class="org-operator">&gt;</span> initiator <span class="org-keyword">and</span> <span class="org-keyword">self</span>.processes[pid]:
+                <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{initiator}<span class="org-string"> sends ELECTION to </span>{pid}<span class="org-string">"</span>)
+                <span class="org-variable-name">active_higher</span> <span class="org-operator">=</span> <span class="org-constant">True</span>
+
+        <span class="org-keyword">if</span> <span class="org-keyword">not</span> active_higher:
+            <span class="org-keyword">self</span>.<span class="org-variable-name">coordinator</span> <span class="org-operator">=</span> initiator
+        <span class="org-keyword">else</span>:
+            <span class="org-keyword">self</span>.<span class="org-variable-name">coordinator</span> <span class="org-operator">=</span> <span class="org-builtin">max</span>(pid <span class="org-keyword">for</span> pid <span class="org-keyword">in</span> <span class="org-keyword">self</span>.processes <span class="org-keyword">if</span> <span class="org-keyword">self</span>.processes[pid])
+
+        <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{<span class="org-keyword">self</span>.coordinator}<span class="org-string"> becomes the COORDINATOR"</span>)
+
+    <span class="org-keyword">def</span> <span class="org-function-name">display</span>(<span class="org-keyword">self</span>):
+        <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Process Status:"</span>)
+        <span class="org-keyword">for</span> pid, status <span class="org-keyword">in</span> <span class="org-keyword">self</span>.processes.items():
+            <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{pid}<span class="org-string">: </span>{'Active' <span class="org-keyword">if</span> status <span class="org-keyword">else</span> 'Down'}<span class="org-string">"</span>)
+        <span class="org-builtin">print</span>(f<span class="org-string">"Coordinator: </span>{<span class="org-keyword">self</span>.coordinator}<span class="org-string">"</span>)
+
+
+<span class="org-keyword">class</span> <span class="org-type">RingElection</span>:
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>, processes):
+        <span class="org-keyword">self</span>.<span class="org-variable-name">processes</span> <span class="org-operator">=</span> processes
+        <span class="org-keyword">self</span>.<span class="org-variable-name">coordinator</span> <span class="org-operator">=</span> <span class="org-constant">None</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">start_election</span>(<span class="org-keyword">self</span>, initiator):
+        <span class="org-builtin">print</span>(f<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Process </span>{initiator}<span class="org-string"> starts Ring Election"</span>)
+        <span class="org-variable-name">message</span> <span class="org-operator">=</span> []
+        <span class="org-variable-name">pids</span> <span class="org-operator">=</span> <span class="org-builtin">list</span>(<span class="org-keyword">self</span>.processes.keys())
+        <span class="org-variable-name">n</span> <span class="org-operator">=</span> <span class="org-builtin">len</span>(pids)
+        <span class="org-variable-name">index</span> <span class="org-operator">=</span> pids.index(initiator)
+
+        <span class="org-variable-name">current</span> <span class="org-operator">=</span> index
+        <span class="org-keyword">while</span> <span class="org-constant">True</span>:
+            <span class="org-variable-name">pid</span> <span class="org-operator">=</span> pids[current]
+            <span class="org-keyword">if</span> <span class="org-keyword">self</span>.processes[pid]:
+                <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{pid}<span class="org-string"> passes message"</span>)
+                message.append(pid)
+
+            <span class="org-variable-name">current</span> <span class="org-operator">=</span> (current <span class="org-operator">+</span> 1) <span class="org-operator">%</span> n
+            <span class="org-keyword">if</span> pids[current] <span class="org-operator">==</span> initiator:
+                <span class="org-keyword">break</span>
+
+        <span class="org-keyword">self</span>.<span class="org-variable-name">coordinator</span> <span class="org-operator">=</span> <span class="org-builtin">max</span>(message)
+        <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{<span class="org-keyword">self</span>.coordinator}<span class="org-string"> becomes the COORDINATOR"</span>)
+
+    <span class="org-keyword">def</span> <span class="org-function-name">display</span>(<span class="org-keyword">self</span>):
+        <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Process Status:"</span>)
+        <span class="org-keyword">for</span> pid, status <span class="org-keyword">in</span> <span class="org-keyword">self</span>.processes.items():
+            <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{pid}<span class="org-string">: </span>{'Active' <span class="org-keyword">if</span> status <span class="org-keyword">else</span> 'Down'}<span class="org-string">"</span>)
+        <span class="org-builtin">print</span>(f<span class="org-string">"Coordinator: </span>{<span class="org-keyword">self</span>.coordinator}<span class="org-string">"</span>)
+
+
+<span class="org-keyword">def</span> <span class="org-function-name">main</span>():
+    <span class="org-variable-name">processes</span> <span class="org-operator">=</span> {
+        1: <span class="org-constant">True</span>,
+        2: <span class="org-constant">True</span>,
+        3: <span class="org-constant">False</span>,
+        4: <span class="org-constant">True</span>,
+        5: <span class="org-constant">True</span>
+    }
+
+    <span class="org-variable-name">bully</span> <span class="org-operator">=</span> BullyElection(processes)
+    <span class="org-variable-name">ring</span> <span class="org-operator">=</span> RingElection(processes)
+
+    <span class="org-keyword">while</span> <span class="org-constant">True</span>:
+        <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">LEADER ELECTION MENU"</span>)
+        <span class="org-builtin">print</span>(<span class="org-string">"1. Bully Election Algorithm"</span>)
+        <span class="org-builtin">print</span>(<span class="org-string">"2. Ring Election Algorithm"</span>)
+        <span class="org-builtin">print</span>(<span class="org-string">"3. Exit"</span>)
+
+        <span class="org-variable-name">choice</span> <span class="org-operator">=</span> <span class="org-builtin">int</span>(<span class="org-builtin">input</span>(<span class="org-string">"Enter your choice: "</span>))
+
+        <span class="org-keyword">if</span> choice <span class="org-operator">==</span> 1:
+            bully.display()
+            <span class="org-variable-name">initiator</span> <span class="org-operator">=</span> <span class="org-builtin">int</span>(<span class="org-builtin">input</span>(<span class="org-string">"Enter initiator process ID: "</span>))
+            bully.start_election(initiator)
+
+        <span class="org-keyword">elif</span> choice <span class="org-operator">==</span> 2:
+            ring.display()
+            <span class="org-variable-name">initiator</span> <span class="org-operator">=</span> <span class="org-builtin">int</span>(<span class="org-builtin">input</span>(<span class="org-string">"Enter initiator process ID: "</span>))
+            ring.start_election(initiator)
+
+        <span class="org-keyword">elif</span> choice <span class="org-operator">==</span> 3:
+            <span class="org-builtin">print</span>(<span class="org-string">"Exiting Program..."</span>)
+            <span class="org-keyword">break</span>
+
+        <span class="org-keyword">else</span>:
+            <span class="org-builtin">print</span>(<span class="org-string">"Invalid choice!"</span>)
+
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> <span class="org-operator">==</span> <span class="org-string">"__main__"</span>:
+    main()
+</code></pre>
+</div>
+
+<pre class="example">
+
+LEADER ELECTION MENU
+1. Bully Election Algorithm
+2. Ring Election Algorithm
+3. Exit
+Enter your choice:
+</pre>
+</div>
+</div>
+<div id="outline-container-orgb5cd66a" class="outline-2">
+<h2 id="orgb5cd66a"><span class="section-number-2">5.</span> Practical 5 - Distributed Mutual Exclusion</h2>
+<div class="outline-text-2" id="text-5">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-comment-delimiter"># </span><span class="org-comment">Lamport's Mutual Exclusion Algorithm (Simulation)
+</span>
+<span class="org-keyword">import</span> heapq
+
+<span class="org-keyword">class</span> <span class="org-type">Process</span>:
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>, pid):
+        <span class="org-keyword">self</span>.<span class="org-variable-name">pid</span> <span class="org-operator">=</span> pid
+        <span class="org-keyword">self</span>.<span class="org-variable-name">clock</span> <span class="org-operator">=</span> 0
+        <span class="org-keyword">self</span>.<span class="org-variable-name">queue</span> <span class="org-operator">=</span> []
+
+    <span class="org-keyword">def</span> <span class="org-function-name">request_cs</span>(<span class="org-keyword">self</span>):
+        <span class="org-keyword">self</span>.<span class="org-variable-name">clock</span> <span class="org-operator">+=</span> 1
+        <span class="org-variable-name">timestamp</span> <span class="org-operator">=</span> <span class="org-keyword">self</span>.clock
+        heapq.heappush(<span class="org-keyword">self</span>.queue, (timestamp, <span class="org-keyword">self</span>.pid))
+        <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{<span class="org-keyword">self</span>.pid}<span class="org-string"> requests CS at time </span>{timestamp}<span class="org-string">"</span>)
+        <span class="org-keyword">return</span> (timestamp, <span class="org-keyword">self</span>.pid)
+
+    <span class="org-keyword">def</span> <span class="org-function-name">receive_request</span>(<span class="org-keyword">self</span>, request):
+        heapq.heappush(<span class="org-keyword">self</span>.queue, request)
+        <span class="org-keyword">self</span>.<span class="org-variable-name">clock</span> <span class="org-operator">=</span> <span class="org-builtin">max</span>(<span class="org-keyword">self</span>.clock, request[0]) <span class="org-operator">+</span> 1
+
+    <span class="org-keyword">def</span> <span class="org-function-name">release_cs</span>(<span class="org-keyword">self</span>):
+        heapq.heappop(<span class="org-keyword">self</span>.queue)
+        <span class="org-builtin">print</span>(f<span class="org-string">"Process </span>{<span class="org-keyword">self</span>.pid}<span class="org-string"> releases CS"</span>)
+
+    <span class="org-keyword">def</span> <span class="org-function-name">can_enter_cs</span>(<span class="org-keyword">self</span>):
+        <span class="org-keyword">return</span> <span class="org-keyword">self</span>.queue[0][1] <span class="org-operator">==</span> <span class="org-keyword">self</span>.pid
+
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Create processes
+</span><span class="org-variable-name">p1</span> <span class="org-operator">=</span> Process(1)
+<span class="org-variable-name">p2</span> <span class="org-operator">=</span> Process(2)
+<span class="org-variable-name">p3</span> <span class="org-operator">=</span> Process(3)
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Simulate requests
+</span><span class="org-variable-name">req1</span> <span class="org-operator">=</span> p1.request_cs()
+p2.receive_request(req1)
+p3.receive_request(req1)
+
+<span class="org-variable-name">req2</span> <span class="org-operator">=</span> p2.request_cs()
+p1.receive_request(req2)
+p3.receive_request(req2)
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Check who enters CS
+</span><span class="org-keyword">if</span> p1.can_enter_cs():
+    <span class="org-builtin">print</span>(<span class="org-string">"Process 1 enters Critical Section"</span>)
+    p1.release_cs()
+
+<span class="org-keyword">if</span> p2.can_enter_cs():
+    <span class="org-builtin">print</span>(<span class="org-string">"Process 2 enters Critical Section"</span>)
+    p2.release_cs()
+</code></pre>
+</div>
+
+<pre class="example">
+Process 1 requests CS at time 1
+Process 2 requests CS at time 3
+Process 1 enters Critical Section
+Process 1 releases CS
+</pre>
+</div>
+</div>
+<div id="outline-container-org72b9f34" class="outline-2">
+<h2 id="org72b9f34"><span class="section-number-2">6.</span> Practical 6 - Parallel Matrix Multplication</h2>
+<div class="outline-text-2" id="text-6">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> multiprocessing
+<span class="org-keyword">import</span> time
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Matrix size
+</span><span class="org-variable-name">SIZE</span> <span class="org-operator">=</span> 3
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Initialize matrices
+</span><span class="org-variable-name">A</span> <span class="org-operator">=</span> [[i <span class="org-operator">+</span> j <span class="org-keyword">for</span> j <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE)] <span class="org-keyword">for</span> i <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE)]
+<span class="org-variable-name">B</span> <span class="org-operator">=</span> [[i <span class="org-operator">*</span> j <span class="org-keyword">for</span> j <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE)] <span class="org-keyword">for</span> i <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE)]
+
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Function to compute one row of result
+</span><span class="org-keyword">def</span> <span class="org-function-name">multiply_row</span>(i):
+    <span class="org-variable-name">row</span> <span class="org-operator">=</span> []
+    <span class="org-keyword">for</span> j <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE):
+        <span class="org-variable-name">sum_val</span> <span class="org-operator">=</span> 0
+        <span class="org-keyword">for</span> k <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE):
+            <span class="org-variable-name">sum_val</span> <span class="org-operator">+=</span> A[i][k] <span class="org-operator">*</span> B[k][j]
+        row.append(sum_val)
+    <span class="org-keyword">return</span> row
+
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> <span class="org-operator">==</span> <span class="org-string">"__main__"</span>:
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">Sequential multiplication
+</span>    <span class="org-variable-name">start_seq</span> <span class="org-operator">=</span> time.time()
+
+    <span class="org-variable-name">seq_result</span> <span class="org-operator">=</span> []
+    <span class="org-keyword">for</span> i <span class="org-keyword">in</span> <span class="org-builtin">range</span>(SIZE):
+        seq_result.append(multiply_row(i))
+
+    <span class="org-variable-name">end_seq</span> <span class="org-operator">=</span> time.time()
+
+    <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Sequential Time:"</span>, end_seq <span class="org-operator">-</span> start_seq)
+
+    <span class="org-builtin">print</span>(<span class="org-string">"Matrix A:"</span>)
+    <span class="org-keyword">for</span> row <span class="org-keyword">in</span> A:
+        <span class="org-builtin">print</span>(row)
+
+    <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Matrix B:"</span>)
+    <span class="org-keyword">for</span> row <span class="org-keyword">in</span> B:
+        <span class="org-builtin">print</span>(row)
+
+    <span class="org-variable-name">start</span> <span class="org-operator">=</span> time.time()
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">Create process pool
+</span>    <span class="org-keyword">with</span> multiprocessing.Pool() <span class="org-keyword">as</span> pool:
+        <span class="org-variable-name">result</span> <span class="org-operator">=</span> pool.<span class="org-builtin">map</span>(multiply_row, <span class="org-builtin">range</span>(SIZE))
+
+    <span class="org-variable-name">end</span> <span class="org-operator">=</span> time.time()
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">FIXED: These lines are now indented correctly
+</span>    <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Result Matrix C:"</span>)
+    <span class="org-keyword">for</span> row <span class="org-keyword">in</span> result:
+        <span class="org-builtin">print</span>(row)
+    <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Parallel Time Taken:"</span>, end <span class="org-operator">-</span> start, <span class="org-string">"seconds"</span>)
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc7bc998" class="outline-2">
+<h2 id="orgc7bc998"><span class="section-number-2">7.</span> Practical 7 - Parallel Merge Sort</h2>
+<div class="outline-text-2" id="text-7">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">from</span> multiprocessing <span class="org-keyword">import</span> Process, Queue
+
+<span class="org-keyword">def</span> <span class="org-function-name">merge</span>(left, right):
+    <span class="org-variable-name">result</span> <span class="org-operator">=</span> []
+    <span class="org-variable-name">i</span> <span class="org-operator">=</span> <span class="org-variable-name">j</span> <span class="org-operator">=</span> 0
+
+    <span class="org-keyword">while</span> i <span class="org-operator">&lt;</span> <span class="org-builtin">len</span>(left) <span class="org-keyword">and</span> j <span class="org-operator">&lt;</span> <span class="org-builtin">len</span>(right):
+        <span class="org-keyword">if</span> left[i] <span class="org-operator">&lt;</span> right[j]:
+            result.append(left[i])
+            <span class="org-variable-name">i</span> <span class="org-operator">+=</span> 1
+        <span class="org-keyword">else</span>:
+            result.append(right[j])
+            <span class="org-variable-name">j</span> <span class="org-operator">+=</span> 1
+
+    result.extend(left[i:])
+    result.extend(right[j:])
+    <span class="org-keyword">return</span> result
+
+
+<span class="org-keyword">def</span> <span class="org-function-name">merge_sort</span>(arr):
+    <span class="org-keyword">if</span> <span class="org-builtin">len</span>(arr) <span class="org-operator">&lt;=</span> 1:
+        <span class="org-keyword">return</span> arr
+
+    <span class="org-variable-name">mid</span> <span class="org-operator">=</span> <span class="org-builtin">len</span>(arr) <span class="org-operator">//</span> 2
+    <span class="org-variable-name">left</span> <span class="org-operator">=</span> merge_sort(arr[:mid])
+    <span class="org-variable-name">right</span> <span class="org-operator">=</span> merge_sort(arr[mid:])
+
+    <span class="org-keyword">return</span> merge(left, right)
+
+
+<span class="org-keyword">def</span> <span class="org-function-name">parallel_sort</span>(arr, q):
+    q.put(merge_sort(arr))
+
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> <span class="org-operator">==</span> <span class="org-string">"__main__"</span>:
+    <span class="org-variable-name">arr</span> <span class="org-operator">=</span> [8, 3, 7, 4, 9, 2, 6, 5]
+    <span class="org-variable-name">mid</span> <span class="org-operator">=</span> <span class="org-builtin">len</span>(arr) <span class="org-operator">//</span> 2
+
+    <span class="org-variable-name">q1</span> <span class="org-operator">=</span> Queue()
+    <span class="org-variable-name">q2</span> <span class="org-operator">=</span> Queue()
+
+    <span class="org-variable-name">p1</span> <span class="org-operator">=</span> Process(target<span class="org-operator">=</span>parallel_sort, args<span class="org-operator">=</span>(arr[:mid], q1))
+    <span class="org-variable-name">p2</span> <span class="org-operator">=</span> Process(target<span class="org-operator">=</span>parallel_sort, args<span class="org-operator">=</span>(arr[mid:], q2))
+
+    p1.start()
+    p2.start()
+
+    <span class="org-variable-name">left</span> <span class="org-operator">=</span> q1.get()
+    <span class="org-variable-name">right</span> <span class="org-operator">=</span> q2.get()
+
+    p1.join()
+    p2.join()
+
+    <span class="org-variable-name">sorted_arr</span> <span class="org-operator">=</span> merge(left, right)
+
+    <span class="org-builtin">print</span>(<span class="org-string">"Original Array:"</span>, arr)
+    <span class="org-builtin">print</span>(<span class="org-string">"Sorted Array:"</span>, sorted_arr)
+</code></pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org3bf8f0d" class="outline-2">
+<h2 id="org3bf8f0d"><span class="section-number-2">8.</span> Practical 8 - Load Balancing Simulation</h2>
+<div class="outline-text-2" id="text-8">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> random
+
+<span class="org-variable-name">tasks</span> <span class="org-operator">=</span> [random.randint(1, 10) <span class="org-keyword">for</span> _ <span class="org-keyword">in</span> <span class="org-builtin">range</span>(10)]
+<span class="org-variable-name">nodes</span> <span class="org-operator">=</span> [0, 0, 0]
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">&#128313; Static Load Balancing (Round Robin)
+</span><span class="org-keyword">for</span> i, t <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(tasks):
+    <span class="org-variable-name">nodes</span>[i <span class="org-operator">%</span> <span class="org-builtin">len</span>(nodes)] <span class="org-operator">+=</span> t
+
+<span class="org-builtin">print</span>(<span class="org-string">"Static Load:"</span>, nodes)
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">&#128313; Dynamic Load Balancing (Assign to least loaded node)
+</span><span class="org-variable-name">nodes</span> <span class="org-operator">=</span> [0, 0, 0]
+
+<span class="org-keyword">for</span> t <span class="org-keyword">in</span> tasks:
+    <span class="org-variable-name">idx</span> <span class="org-operator">=</span> nodes.index(<span class="org-builtin">min</span>(nodes))
+    <span class="org-variable-name">nodes</span>[idx] <span class="org-operator">+=</span> t
+
+<span class="org-builtin">print</span>(<span class="org-string">"Dynamic Load:"</span>, nodes)
+</code></pre>
+</div>
+
+<pre class="example">
+Static Load: [21, 19, 9]
+Dynamic Load: [17, 16, 16]
+</pre>
+</div>
+</div>
+<div id="outline-container-org1487e1b" class="outline-2">
+<h2 id="org1487e1b"><span class="section-number-2">9.</span> Practical 9 - Fault Tolerance Mechanism</h2>
+<div class="outline-text-2" id="text-9">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">import</span> random
+
+<span class="org-builtin">file</span> <span class="org-operator">=</span> <span class="org-string">"log.txt"</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Read last checkpoint
+</span><span class="org-keyword">try</span>:
+    <span class="org-variable-name">f</span> <span class="org-operator">=</span> <span class="org-builtin">open</span>(<span class="org-builtin">file</span>, <span class="org-string">"r"</span>)
+    <span class="org-variable-name">last</span> <span class="org-operator">=</span> <span class="org-builtin">int</span>(f.read())
+    f.close()
+<span class="org-keyword">except</span>:
+    <span class="org-variable-name">last</span> <span class="org-operator">=</span> 0
+
+<span class="org-builtin">print</span>(<span class="org-string">"Starting from step:"</span>, last)
+
+<span class="org-keyword">try</span>:
+    <span class="org-keyword">for</span> i <span class="org-keyword">in</span> <span class="org-builtin">range</span>(last <span class="org-operator">+</span> 1, 11):
+        <span class="org-builtin">print</span>(<span class="org-string">"Step:"</span>, i)
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Save checkpoint
+</span>        <span class="org-variable-name">f</span> <span class="org-operator">=</span> <span class="org-builtin">open</span>(<span class="org-builtin">file</span>, <span class="org-string">"w"</span>)
+        f.write(<span class="org-builtin">str</span>(i))
+        f.close()
+
+        <span class="org-comment-delimiter"># </span><span class="org-comment">Simulate failure
+</span>        <span class="org-keyword">if</span> random.random() <span class="org-operator">&lt;</span> 0.3:
+            <span class="org-keyword">raise</span> <span class="org-type">Exception</span>(<span class="org-string">"Crash"</span>)
+
+<span class="org-keyword">except</span>:
+    <span class="org-builtin">print</span>(<span class="org-string">"Failure! Restart program to recover."</span>)
+</code></pre>
+</div>
+
+<pre class="example">
+Starting from step: 10
+</pre>
+</div>
+</div>
+<div id="outline-container-org3042f83" class="outline-2">
+<h2 id="org3042f83"><span class="section-number-2">10.</span> Practical 10 - MapReduce Word Count</h2>
+<div class="outline-text-2" id="text-10">
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">def</span> <span class="org-function-name">local_wc</span>():
+    <span class="org-keyword">try</span>:
+        <span class="org-variable-name">text</span> <span class="org-operator">=</span> <span class="org-builtin">open</span>(<span class="org-string">"input.txt"</span>).read().lower().split()
+        <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">Local Result:"</span>)
+        <span class="org-keyword">for</span> w <span class="org-keyword">in</span> <span class="org-builtin">set</span>(text):
+            <span class="org-builtin">print</span>(w, <span class="org-string">":"</span>, text.count(w))
+    <span class="org-keyword">except</span>:
+        <span class="org-builtin">print</span>(<span class="org-string">"input.txt not found!"</span>)
+
+
+<span class="org-keyword">def</span> <span class="org-function-name">spark_wc</span>():
+    <span class="org-keyword">try</span>:
+        <span class="org-keyword">from</span> pyspark <span class="org-keyword">import</span> SparkContext
+        <span class="org-variable-name">sc</span> <span class="org-operator">=</span> SparkContext(<span class="org-string">"local[*]"</span>, <span class="org-string">"WC"</span>)
+
+        <span class="org-variable-name">r</span> <span class="org-operator">=</span> (sc.textFile(<span class="org-string">"input.txt"</span>)
+             .flatMap(<span class="org-keyword">lambda</span> x: x.split())
+             .<span class="org-builtin">map</span>(<span class="org-keyword">lambda</span> x: (x.lower(), 1))
+             .reduceByKey(<span class="org-keyword">lambda</span> a, b: a <span class="org-operator">+</span> b)
+             .collect())
+
+        <span class="org-builtin">print</span>(<span class="org-string">"</span><span class="org-constant">\n</span><span class="org-string">PySpark Result:"</span>)
+        <span class="org-keyword">for</span> w, c <span class="org-keyword">in</span> r:
+            <span class="org-builtin">print</span>(w, <span class="org-string">":"</span>, c)
+
+        sc.stop()
+
+    <span class="org-keyword">except</span> <span class="org-type">Exception</span> <span class="org-keyword">as</span> e:
+        <span class="org-builtin">print</span>(<span class="org-string">"PySpark Error:"</span>, e)
+
+
+<span class="org-variable-name">ch</span> <span class="org-operator">=</span> <span class="org-builtin">input</span>(<span class="org-string">"1.Local  2.PySpark : "</span>)
+local_wc() <span class="org-keyword">if</span> ch <span class="org-operator">==</span> <span class="org-string">"1"</span> <span class="org-keyword">else</span> spark_wc()
+</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Created: 2026-05-16 Sat 14:25</p>
+<p class="date">Created: 2026-05-16 Sat 15:33</p>
 </div>
 </body>
 </html>
