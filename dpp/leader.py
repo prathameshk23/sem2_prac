@@ -1,101 +1,52 @@
-class BullyElection:
-    def __init__(self, processes):
-        self.processes = processes
-        self.coordinator = None
-
-    def start_election(self, initiator):
-        print(f"\nProcess {initiator} starts Bully Election")
-        active_higher = False
-
-        for pid in self.processes:
-            if pid > initiator and self.processes[pid]:
-                print(f"Process {initiator} sends ELECTION to {pid}")
-                active_higher = True
-
-        if not active_higher:
-            self.coordinator = initiator
-        else:
-            self.coordinator = max(pid for pid in self.processes if self.processes[pid])
-
-        print(f"Process {self.coordinator} becomes the COORDINATOR")
-
-    def display(self):
-        print("\nProcess Status:")
-        for pid, status in self.processes.items():
-            print(f"Process {pid}: {'Active' if status else 'Down'}")
-        print(f"Coordinator: {self.coordinator}")
+processes = {1: 1, 2: 1, 3: 0, 4: 1, 5: 1}
 
 
-class RingElection:
-    def __init__(self, processes):
-        self.processes = processes
-        self.coordinator = None
+def bully(initiator):
+    active = [p for p in processes if p > initiator and processes[p]]
 
-    def start_election(self, initiator):
-        print(f"\nProcess {initiator} starts Ring Election")
-        message = []
-        pids = list(self.processes.keys())
-        n = len(pids)
-        index = pids.index(initiator)
+    if active:
+        for p in active:
+            print(f"{initiator} -> Election -> {p}")
+        coord = max(p for p in active if processes[p])
+    else:
+        coord = initiator
 
-        current = index
-        while True:
-            pid = pids[current]
-            if self.processes[pid]:
-                print(f"Process {pid} passes message")
-                message.append(pid)
-
-            current = (current + 1) % n
-            if pids[current] == initiator:
-                break
-
-        self.coordinator = max(message)
-        print(f"Process {self.coordinator} becomes the COORDINATOR")
-
-    def display(self):
-        print("\nProcess Status:")
-        for pid, status in self.processes.items():
-            print(f"Process {pid}: {'Active' if status else 'Down'}")
-        print(f"Coordinator: {self.coordinator}")
+    print(f"Coordinatior is {coord}")
+    return coord
 
 
-def main():
-    processes = {
-        1: True,
-        2: True,
-        3: False,
-        4: True,
-        5: True
-    }
-
-    bully = BullyElection(processes)
-    ring = RingElection(processes)
+def ring(initiator):
+    pids = list(processes.keys())
+    i = pids.index(initiator)
+    msg = []
 
     while True:
-        print("\nLEADER ELECTION MENU")
-        print("1. Bully Election Algorithm")
-        print("2. Ring Election Algorithm")
-        print("3. Exit")
+        pid = pids[i]
+        if processes[pid]:
+            print(f"{pid} passes message")
+            msg.append(pid)
 
-        choice = int(input("Enter your choice: "))
-
-        if choice == 1:
-            bully.display()
-            initiator = int(input("Enter initiator process ID: "))
-            bully.start_election(initiator)
-
-        elif choice == 2:
-            ring.display()
-            initiator = int(input("Enter initiator process ID: "))
-            ring.start_election(initiator)
-
-        elif choice == 3:
-            print("Exiting Program...")
+        i = (i + 1) % len(pids)
+        if pids[i] == initiator:
             break
 
-        else:
-            print("Invalid choice!")
+    print(f"Coordinator is {max(msg)}")
+    return max(msg)
 
 
-if __name__ == "__main__":
-    main()
+while True:
+    print("\n1.Bully 2.Ring 3.Exit")
+    ch = int(input("Choice: "))
+
+    if ch == 3:
+        break
+
+    for p, s in processes.items():
+        print(f"Process {p} is {'Active' if s else 'Down'}")
+
+    init = int(input("Initiator: "))
+
+    if ch == 1:
+        bully(init)
+    if ch == 2:
+        ring(init)

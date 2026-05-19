@@ -1,19 +1,19 @@
 import random
 
 tasks = [random.randint(1, 10) for _ in range(10)]
-nodes = [0, 0, 0]
+print(f"Tasks {tasks}")
 
-# 🔹 Static Load Balancing (Round Robin)
+nodes = [0] * 3
+
+
 for i, t in enumerate(tasks):
     nodes[i % len(nodes)] += t
 
-print("Static Load:", nodes)
+print(f"Static load {nodes}")
 
-# 🔹 Dynamic Load Balancing (Assign to least loaded node)
-nodes = [0, 0, 0]
+nodes = [0] * 3
 
 for t in tasks:
-    idx = nodes.index(min(nodes))
-    nodes[idx] += t
+    nodes[nodes.index(min(nodes))] += t
 
-print("Dynamic Load:", nodes)
+print(f"Dynamic load {nodes}")

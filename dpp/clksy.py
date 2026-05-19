@@ -1,69 +1,44 @@
 import time
 import random
 
-# -------------------------
-# Time Server
-# -------------------------
+
 class TimeServer:
     def get_time(self):
-        # Returns current server time
         return time.time()
 
-# -------------------------
-# Client Node
-# -------------------------
+
 class Client:
-    def __init__(self, clock_offset):
-        # Client clock is ahead/behind by offset seconds
-        self.clock_offset = clock_offset
+    def __init__(self, offset):
+        self.offset = offset
 
     def get_local_time(self):
-        return time.time() + self.clock_offset
+        return time.time() + self.offset
 
-    def synchronize_clock(self, server):
-        print("\n--- Cristian’s Algorithm ---")
+    def sync(self, server):
 
-        # Client sends request at time T1
-        T1 = self.get_local_time()
-        print("Client sends request at:", T1)
+        t1 = self.get_local_time()
 
-        # Simulated network delay
-        delay = random.uniform(0.1, 0.5)
-        time.sleep(delay)
+        time.sleep(random.uniform(0.1, 0.5))
 
-        # Server sends its time
         server_time = server.get_time()
 
-        # Simulated return delay
-        time.sleep(delay)
+        time.sleep(random.uniform(0.1, 0.5))
 
-        # Client receives response at time T2
-        T2 = self.get_local_time()
-        print("Client receives response at:", T2)
+        t2 = self.get_local_time()
 
-        # RTT calculation
-        RTT = T2 - T1
-        print("Estimated RTT:", RTT)
+        rtt = t2 - t1
 
-        # Cristian's time calculation
-        adjusted_time = server_time + (RTT / 2)
+        adjusted_time = server_time + (rtt / 2)
 
-        # Adjust client clock
-        self.clock_offset = adjusted_time - time.time()
+        self.offset = adjusted_time - time.time()
+        print(f"new client time {self.get_local_time()}")
 
-        print("Client clock synchronized!")
-        print("New Client Time:", self.get_local_time())
 
-# -------------------------
-# Main Simulation
-# -------------------------
 if __name__ == "__main__":
     server = TimeServer()
+    client = Client(offset=-5)
 
-    # Client clock is 5 seconds slow
-    client = Client(clock_offset=-5)
+    print(f"Server time {server.get_time()}")
+    print(f"Initial time is {client.get_local_time()}")
 
-    print("Initial Client Time:", client.get_local_time())
-    print("Server Time:", server.get_time())
-
-    client.synchronize_clock(server)
+    client.sync(server)

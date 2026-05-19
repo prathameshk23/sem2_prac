@@ -1,56 +1,45 @@
-import multiprocessing
-import time
+import multiprocessing, time
 
-# Matrix size
-SIZE = 3
+n = 3
 
-# Initialize matrices
-A = [[i + j for j in range(SIZE)] for i in range(SIZE)]
-B = [[i * j for j in range(SIZE)] for i in range(SIZE)]
+a = [[i + j for j in range(n)] for i in range(n)]
+b = [[i * j for j in range(n)] for i in range(n)]
 
 
-# Function to compute one row of result
-def multiply_row(i):
-    row = []
-    for j in range(SIZE):
-        sum_val = 0
-        for k in range(SIZE):
-            sum_val += A[i][k] * B[k][j]
-        row.append(sum_val)
-    return row
+def multiply(i):
+    return [sum(a[i][k] * b[k][j] for k in range(n)) for j in range(n)]
+
+
+def multiply(i):
+    return [sum(a[i][k] * b[k][j] for k in range(n)) for j in range(n)]
 
 
 if __name__ == "__main__":
 
-    # Sequential multiplication
-    start_seq = time.time()
-
-    seq_result = []
-    for i in range(SIZE):
-        seq_result.append(multiply_row(i))
-
-    end_seq = time.time()
-
-    print("\nSequential Time:", end_seq - start_seq)
-
-    print("Matrix A:")
-    for row in A:
+    print("\nMatrix A")
+    for row in a:
         print(row)
 
-    print("\nMatrix B:")
-    for row in B:
+    print("\nMatrix B")
+    for row in b:
         print(row)
 
-    start = time.time()
+    t1 = time.time()
+    seq = [multiply(i) for i in range(n)]
 
-    # Create process pool
-    with multiprocessing.Pool() as pool:
-        result = pool.map(multiply_row, range(SIZE))
+    print("\nMatrix Result")
+    for row in seq:
+        print(row)
 
-    end = time.time()
+    print(f"Time taken by sequencial {time.time() - t1}")
 
-    # FIXED: These lines are now indented correctly
-    print("\nResult Matrix C:")
+    t2 = time.time()
+
+    with multiprocessing.Pool() as p:
+        result = p.map(multiply, range(n))
+
+    print("\nMatrix Result")
     for row in result:
         print(row)
-    print("\nParallel Time Taken:", end - start, "seconds")
+
+    print(f"Time taken by parallel {time.time() - t2}")

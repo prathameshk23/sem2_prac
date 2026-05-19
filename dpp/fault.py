@@ -1,29 +1,23 @@
 import random
 
-file = "log.txt"
-
-# Read last checkpoint
-try:
-    f = open(file, "r")
-    last = int(f.read())
-    f.close()
-except:
-    last = 0
-
-print("Starting from step:", last)
+checkpoint = 0
 
 try:
-    for i in range(last + 1, 11):
-        print("Step:", i)
+    with open("log.txt", "r") as f:
+        checkpoint = int(f.read())
+except FileNotFoundError:
+    pass
 
-        # Save checkpoint
-        f = open(file, "w")
-        f.write(str(i))
-        f.close()
+print(f"Starting step {checkpoint}")
 
-        # Simulate failure
+try:
+    for i in range(checkpoint + 1, 11):
+        print(f"Step {i}")
+
+        with open("log.txt", "w") as f:
+            f.write(str(i))
+
         if random.random() < 0.3:
             raise Exception("Crash")
-
 except:
-    print("Failure! Restart program to recover.")
+    print("A failiure as occured...Restart")

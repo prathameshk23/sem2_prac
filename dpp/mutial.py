@@ -1,51 +1,48 @@
-# Lamport's Mutual Exclusion Algorithm (Simulation)
-
 import heapq
+
 
 class Process:
     def __init__(self, pid):
         self.pid = pid
         self.clock = 0
-        self.queue = []
+        self.q = []
 
-    def request_cs(self):
+    def request(self):
         self.clock += 1
-        timestamp = self.clock
-        heapq.heappush(self.queue, (timestamp, self.pid))
-        print(f"Process {self.pid} requests CS at time {timestamp}")
-        return (timestamp, self.pid)
+        req = (self.clock, self.pid)
+        heapq.heappush(self.q, req)
+        print(f"Process {self.pid} requests for CS at {self.clock}")
+        return req
 
-    def receive_request(self, request):
-        heapq.heappush(self.queue, request)
+    def recive_req(self, request):
+        heapq.heappush(self.q, request)
         self.clock = max(self.clock, request[0]) + 1
 
-    def release_cs(self):
-        heapq.heappop(self.queue)
-        print(f"Process {self.pid} releases CS")
+    def can_enter(self):
+        return self.q[0][1] == self.pid
 
-    def can_enter_cs(self):
-        return self.queue[0][1] == self.pid
+    def release(self):
+        heapq.heappop(self.q)
+        print(f"Process {self.pid} released from CS")
 
 
-# Create processes
-p1 = Process(1)
-p2 = Process(2)
-p3 = Process(3)
+if __name__ == "__main__":
+    p1 = Process(1)
+    p2 = Process(2)
+    p3 = Process(3)
 
-# Simulate requests
-req1 = p1.request_cs()
-p2.receive_request(req1)
-p3.receive_request(req1)
+    req1 = p1.request()
+    p2.recive_req(req1)
+    p3.recive_req(req1)
 
-req2 = p2.request_cs()
-p1.receive_request(req2)
-p3.receive_request(req2)
+    req2 = p2.request()
+    p1.recive_req(req2)
+    p3.recive_req(req2)
 
-# Check who enters CS
-if p1.can_enter_cs():
-    print("Process 1 enters Critical Section")
-    p1.release_cs()
+    if p1.can_enter():
+        print("P1 enters CS")
+        p1.release()
 
-if p2.can_enter_cs():
-    print("Process 2 enters Critical Section")
-    p2.release_cs()
+    if p2.can_enter():
+        print("P1 enters CS")
+        p2.release()

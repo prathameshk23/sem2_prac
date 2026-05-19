@@ -150,72 +150,47 @@ server.serve_forever()
 import time
 import random
 
-# -------------------------
-# Time Server
-# -------------------------
+
 class TimeServer:
     def get_time(self):
-        # Returns current server time
         return time.time()
 
-# -------------------------
-# Client Node
-# -------------------------
+
 class Client:
-    def __init__(self, clock_offset):
-        # Client clock is ahead/behind by offset seconds
-        self.clock_offset = clock_offset
+    def __init__(self, offset):
+        self.offset = offset
 
     def get_local_time(self):
-        return time.time() + self.clock_offset
+        return time.time() + self.offset
 
-    def synchronize_clock(self, server):
-        print("\n--- Cristian’s Algorithm ---")
+    def sync(self, server):
 
-        # Client sends request at time T1
-        T1 = self.get_local_time()
-        print("Client sends request at:", T1)
+        t1 = self.get_local_time()
 
-        # Simulated network delay
-        delay = random.uniform(0.1, 0.5)
-        time.sleep(delay)
+        time.sleep(random.uniform(0.1, 0.5))
 
-        # Server sends its time
         server_time = server.get_time()
 
-        # Simulated return delay
-        time.sleep(delay)
+        time.sleep(random.uniform(0.1, 0.5))
 
-        # Client receives response at time T2
-        T2 = self.get_local_time()
-        print("Client receives response at:", T2)
+        t2 = self.get_local_time()
 
-        # RTT calculation
-        RTT = T2 - T1
-        print("Estimated RTT:", RTT)
+        rtt = t2 - t1
 
-        # Cristian's time calculation
-        adjusted_time = server_time + (RTT / 2)
+        adjusted_time = server_time + (rtt / 2)
 
-        # Adjust client clock
-        self.clock_offset = adjusted_time - time.time()
+        self.offset = adjusted_time - time.time()
+        print(f"new client time {self.get_local_time()}")
 
-        print("Client clock synchronized!")
-        print("New Client Time:", self.get_local_time())
 
-# -------------------------
-# Main Simulation
-# -------------------------
 if __name__ == "__main__":
     server = TimeServer()
+    client = Client(offset=-5)
 
-    # Client clock is 5 seconds slow
-    client = Client(clock_offset=-5)
+    print(f"Server time {server.get_time()}")
+    print(f"Initial time is {client.get_local_time()}")
 
-    print("Initial Client Time:", client.get_local_time())
-    print("Server Time:", server.get_time())
-
-    client.synchronize_clock(server)
+    client.sync(server)
 #+end_src
 
 #+RESULTS:
@@ -231,107 +206,58 @@ if __name__ == "__main__":
 
 * Practical 4 - Leader Election Algorithm
 #+begin_src python :tangle leader.py
-class BullyElection:
-    def __init__(self, processes):
-        self.processes = processes
-        self.coordinator = None
-
-    def start_election(self, initiator):
-        print(f"\nProcess {initiator} starts Bully Election")
-        active_higher = False
-
-        for pid in self.processes:
-            if pid > initiator and self.processes[pid]:
-                print(f"Process {initiator} sends ELECTION to {pid}")
-                active_higher = True
-
-        if not active_higher:
-            self.coordinator = initiator
-        else:
-            self.coordinator = max(pid for pid in self.processes if self.processes[pid])
-
-        print(f"Process {self.coordinator} becomes the COORDINATOR")
-
-    def display(self):
-        print("\nProcess Status:")
-        for pid, status in self.processes.items():
-            print(f"Process {pid}: {'Active' if status else 'Down'}")
-        print(f"Coordinator: {self.coordinator}")
+processes = {1: 1, 2: 1, 3: 0, 4: 1, 5: 1}
 
 
-class RingElection:
-    def __init__(self, processes):
-        self.processes = processes
-        self.coordinator = None
+def bully(initiator):
+    active = [p for p in processes if p > initiator and processes[p]]
 
-    def start_election(self, initiator):
-        print(f"\nProcess {initiator} starts Ring Election")
-        message = []
-        pids = list(self.processes.keys())
-        n = len(pids)
-        index = pids.index(initiator)
+    if active:
+        for p in active:
+            print(f"{initiator} -> Election -> {p}")
+        coord = max(p for p in active if processes[p])
+    else:
+        coord = initiator
 
-        current = index
-        while True:
-            pid = pids[current]
-            if self.processes[pid]:
-                print(f"Process {pid} passes message")
-                message.append(pid)
-
-            current = (current + 1) % n
-            if pids[current] == initiator:
-                break
-
-        self.coordinator = max(message)
-        print(f"Process {self.coordinator} becomes the COORDINATOR")
-
-    def display(self):
-        print("\nProcess Status:")
-        for pid, status in self.processes.items():
-            print(f"Process {pid}: {'Active' if status else 'Down'}")
-        print(f"Coordinator: {self.coordinator}")
+    print(f"Coordinatior is {coord}")
+    return coord
 
 
-def main():
-    processes = {
-        1: True,
-        2: True,
-        3: False,
-        4: True,
-        5: True
-    }
-
-    bully = BullyElection(processes)
-    ring = RingElection(processes)
+def ring(initiator):
+    pids = list(processes.keys())
+    i = pids.index(initiator)
+    msg = []
 
     while True:
-        print("\nLEADER ELECTION MENU")
-        print("1. Bully Election Algorithm")
-        print("2. Ring Election Algorithm")
-        print("3. Exit")
+        pid = pids[i]
+        if processes[pid]:
+            print(f"{pid} passes message")
+            msg.append(pid)
 
-        choice = int(input("Enter your choice: "))
-
-        if choice == 1:
-            bully.display()
-            initiator = int(input("Enter initiator process ID: "))
-            bully.start_election(initiator)
-
-        elif choice == 2:
-            ring.display()
-            initiator = int(input("Enter initiator process ID: "))
-            ring.start_election(initiator)
-
-        elif choice == 3:
-            print("Exiting Program...")
+        i = (i + 1) % len(pids)
+        if pids[i] == initiator:
             break
 
-        else:
-            print("Invalid choice!")
+    print(f"Coordinator is {max(msg)}")
+    return max(msg)
 
 
-if __name__ == "__main__":
-    main()
+while True:
+    print("\n1.Bully 2.Ring 3.Exit")
+    ch = int(input("Choice: "))
+
+    if ch == 3:
+        break
+
+    for p, s in processes.items():
+        print(f"Process {p} is {'Active' if s else 'Down'}")
+
+    init = int(input("Initiator: "))
+
+    if ch == 1:
+        bully(init)
+    if ch == 2:
+        ring(init)
 #+end_src
 
 #+RESULTS:
@@ -345,56 +271,54 @@ if __name__ == "__main__":
 * Practical 5 - Distributed Mutual Exclusion
 #+begin_src python :tangle mutial.py
 # Lamport's Mutual Exclusion Algorithm (Simulation)
-
 import heapq
+
 
 class Process:
     def __init__(self, pid):
         self.pid = pid
         self.clock = 0
-        self.queue = []
+        self.q = []
 
-    def request_cs(self):
+    def request(self):
         self.clock += 1
-        timestamp = self.clock
-        heapq.heappush(self.queue, (timestamp, self.pid))
-        print(f"Process {self.pid} requests CS at time {timestamp}")
-        return (timestamp, self.pid)
+        req = (self.clock, self.pid)
+        heapq.heappush(self.q, req)
+        print(f"Process {self.pid} requests for CS at {self.clock}")
+        return req
 
-    def receive_request(self, request):
-        heapq.heappush(self.queue, request)
+    def recive_req(self, request):
+        heapq.heappush(self.q, request)
         self.clock = max(self.clock, request[0]) + 1
 
-    def release_cs(self):
-        heapq.heappop(self.queue)
-        print(f"Process {self.pid} releases CS")
+    def can_enter(self):
+        return self.q[0][1] == self.pid
 
-    def can_enter_cs(self):
-        return self.queue[0][1] == self.pid
+    def release(self):
+        heapq.heappop(self.q)
+        print(f"Process {self.pid} released from CS")
 
 
-# Create processes
-p1 = Process(1)
-p2 = Process(2)
-p3 = Process(3)
+if __name__ == "__main__":
+    p1 = Process(1)
+    p2 = Process(2)
+    p3 = Process(3)
 
-# Simulate requests
-req1 = p1.request_cs()
-p2.receive_request(req1)
-p3.receive_request(req1)
+    req1 = p1.request()
+    p2.recive_req(req1)
+    p3.recive_req(req1)
 
-req2 = p2.request_cs()
-p1.receive_request(req2)
-p3.receive_request(req2)
+    req2 = p2.request()
+    p1.recive_req(req2)
+    p3.recive_req(req2)
 
-# Check who enters CS
-if p1.can_enter_cs():
-    print("Process 1 enters Critical Section")
-    p1.release_cs()
+    if p1.can_enter():
+        print("P1 enters CS")
+        p1.release()
 
-if p2.can_enter_cs():
-    print("Process 2 enters Critical Section")
-    p2.release_cs()
+    if p2.can_enter():
+        print("P1 enters CS")
+        p2.release()
 #+end_src
 
 #+RESULTS:
@@ -405,106 +329,78 @@ if p2.can_enter_cs():
 
 * Practical 6 - Parallel Matrix Multplication
 #+begin_src python :tangle matrix.py
-import multiprocessing
-import time
+import multiprocessing, time
 
-# Matrix size
-SIZE = 3
+n = 3
 
-# Initialize matrices
-A = [[i + j for j in range(SIZE)] for i in range(SIZE)]
-B = [[i * j for j in range(SIZE)] for i in range(SIZE)]
+a = [[i + j for j in range(n)] for i in range(n)]
+b = [[i * j for j in range(n)] for i in range(n)]
 
 
-# Function to compute one row of result
-def multiply_row(i):
-    row = []
-    for j in range(SIZE):
-        sum_val = 0
-        for k in range(SIZE):
-            sum_val += A[i][k] * B[k][j]
-        row.append(sum_val)
-    return row
+def multiply(i):
+    return [sum(a[i][k] * b[k][j] for k in range(n)) for j in range(n)]
+
+
+def multiply(i):
+    return [sum(a[i][k] * b[k][j] for k in range(n)) for j in range(n)]
 
 
 if __name__ == "__main__":
 
-    # Sequential multiplication
-    start_seq = time.time()
-
-    seq_result = []
-    for i in range(SIZE):
-        seq_result.append(multiply_row(i))
-
-    end_seq = time.time()
-
-    print("\nSequential Time:", end_seq - start_seq)
-
-    print("Matrix A:")
-    for row in A:
+    print("\nMatrix A")
+    for row in a:
         print(row)
 
-    print("\nMatrix B:")
-    for row in B:
+    print("\nMatrix B")
+    for row in b:
         print(row)
 
-    start = time.time()
+    t1 = time.time()
+    seq = [multiply(i) for i in range(n)]
 
-    # Create process pool
-    with multiprocessing.Pool() as pool:
-        result = pool.map(multiply_row, range(SIZE))
+    print("\nMatrix Result")
+    for row in seq:
+        print(row)
 
-    end = time.time()
+    print(f"Time taken by sequencial {time.time() - t1}")
 
-    # FIXED: These lines are now indented correctly
-    print("\nResult Matrix C:")
+    t2 = time.time()
+
+    with multiprocessing.Pool() as p:
+        result = p.map(multiply, range(n))
+
+    print("\nMatrix Result")
     for row in result:
         print(row)
-    print("\nParallel Time Taken:", end - start, "seconds")
+
+    print(f"Time taken by parallel {time.time() - t2}")
 #+end_src
 
 * Practical 7 - Parallel Merge Sort
 #+begin_src python :tangle merge.py
 from multiprocessing import Process, Queue
 
-def merge(left, right):
-    result = []
-    i = j = 0
 
-    while i < len(left) and j < len(right):
-        if left[i] < right[j]:
-            result.append(left[i])
-            i += 1
-        else:
-            result.append(right[j])
-            j += 1
-
-    result.extend(left[i:])
-    result.extend(right[j:])
-    return result
+def merge(a, b):
+    r = []
+    while a and b:
+        r.append(a.pop(0) if a[0] < b[0] else b.pop(0))
+    return r + a + b
 
 
-def merge_sort(arr):
-    if len(arr) <= 1:
-        return arr
-
-    mid = len(arr) // 2
-    left = merge_sort(arr[:mid])
-    right = merge_sort(arr[mid:])
-
-    return merge(left, right)
+def sort(a):
+    mid = len(a) // 2
+    return a if len(a) <= 1 else merge(sort(a[:mid]), sort(a[mid:]))
 
 
-def parallel_sort(arr, q):
-    q.put(merge_sort(arr))
+def parallel_sort(a, q):
+    q.put(sort(a))
 
 
 if __name__ == "__main__":
     arr = [8, 3, 7, 4, 9, 2, 6, 5]
     mid = len(arr) // 2
-
-    q1 = Queue()
-    q2 = Queue()
+    q1, q2 = Queue(), Queue()
 
     p1 = Process(target=parallel_sort, args=(arr[:mid], q1))
     p2 = Process(target=parallel_sort, args=(arr[mid:], q2))
@@ -512,16 +408,13 @@ if __name__ == "__main__":
     p1.start()
     p2.start()
 
-    left = q1.get()
-    right = q2.get()
+    sorted_arr = merge(q1.get(), q2.get())
 
     p1.join()
     p2.join()
 
-    sorted_arr = merge(left, right)
-
-    print("Original Array:", arr)
-    print("Sorted Array:", sorted_arr)
+    print("Unsorted:", arr)
+    print("Sorted:", sorted_arr)
 #+end_src
 
 * Practical 8 - Load Balancing Simulation
@@ -529,22 +422,22 @@ if __name__ == "__main__":
 import random
 
 tasks = [random.randint(1, 10) for _ in range(10)]
-nodes = [0, 0, 0]
+print(f"Tasks {tasks}")
 
-# 🔹 Static Load Balancing (Round Robin)
+nodes = [0] * 3
+
+
 for i, t in enumerate(tasks):
     nodes[i % len(nodes)] += t
 
-print("Static Load:", nodes)
+print(f"Static load {nodes}")
 
-# 🔹 Dynamic Load Balancing (Assign to least loaded node)
-nodes = [0, 0, 0]
+nodes = [0] * 3
 
 for t in tasks:
-    idx = nodes.index(min(nodes))
-    nodes[idx] += t
+    nodes[nodes.index(min(nodes))] += t
 
-print("Dynamic Load:", nodes)
+print(f"Dynamic load {nodes}")
 #+end_src
 
 #+RESULTS:
@@ -555,33 +448,27 @@ print("Dynamic Load:", nodes)
 #+begin_src python :tangle fault.py
 import random
 
-file = "log.txt"
-
-# Read last checkpoint
-try:
-    f = open(file, "r")
-    last = int(f.read())
-    f.close()
-except:
-    last = 0
-
-print("Starting from step:", last)
+checkpoint = 0
 
 try:
-    for i in range(last + 1, 11):
-        print("Step:", i)
+    with open("log.txt", "r") as f:
+        checkpoint = int(f.read())
+except FileNotFoundError:
+    pass
 
-        # Save checkpoint
-        f = open(file, "w")
-        f.write(str(i))
-        f.close()
+print(f"Starting step {checkpoint}")
 
-        # Simulate failure
+try:
+    for i in range(checkpoint + 1, 11):
+        print(f"Step {i}")
+
+        with open("log.txt", "w") as f:
+            f.write(str(i))
+
         if random.random() < 0.3:
             raise Exception("Crash")
-
 except:
-    print("Failure! Restart program to recover.")
+    print("A failiure as occured...Restart")
 #+end_src
 
 #+RESULTS:
@@ -589,37 +476,24 @@ except:
 
 * Practical 10 - MapReduce Word Count
 #+begin_src python :tangle mapreduce.py
+from pyspark import SparkContext
+
+
 def local_wc():
-    try:
-        text = open("input.txt").read().lower().split()
-        print("\nLocal Result:")
-        for w in set(text):
-            print(w, ":", text.count(w))
-    except:
-        print("input.txt not found!")
+    t = open("input.txt").read().lower().split()
+    print({w: t.count(w) for w in set(t)})
 
 
-def spark_wc():
-    try:
-        from pyspark import SparkContext
-        sc = SparkContext("local[*]", "WC")
-
-        r = (sc.textFile("input.txt")
-             .flatMap(lambda x: x.split())
-             .map(lambda x: (x.lower(), 1))
-             .reduceByKey(lambda a, b: a + b)
-             .collect())
-
-        print("\nPySpark Result:")
-        for w, c in r:
-            print(w, ":", c)
-
-        sc.stop()
-
-    except Exception as e:
-        print("PySpark Error:", e)
+def spark():
+    sc = SparkContext("local[*]", "WC")
+    print(
+        sc.textFile("input.txt")
+        .flatMap(lambda x: x.split())
+        .map(lambda x: (x.lower(), 1))
+        .reduceByKey(lambda a, b: a + b)
+        .collect()
+    )
 
 
-ch = input("1.Local  2.PySpark : ")
-local_wc() if ch == "1" else spark_wc()
+local_wc() if input("Choose 1:Local or 2: PySpark") == "1" else spark()
 #+end_src
